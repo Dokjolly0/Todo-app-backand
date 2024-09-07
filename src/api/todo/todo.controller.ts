@@ -1,6 +1,6 @@
 import TodoService from "./todo.service";
 import { Request, Response, NextFunction } from "express";
-import { AddTodoDto,CheckTodoDto } from "./todo.dto";
+import { AddTodoDto, CheckTodoDto } from "./todo.dto";
 import { TypedRequest } from "../../utils/typed-request";
 import { UserModel } from "../user/user.model";
 import { NotFoundError } from "../../errors/not-found";
@@ -26,17 +26,23 @@ export const add = async (
 ) => {
   try {
     const user = req.user!;
-    const isAssign = await UserModel.findById(req.body.assignedTo);
-    if (!isAssign) throw new BadRequestError();
+    // Check if the assignedTo user exists
+    let isAssign;
+    if (!req.body.assignedTo !== null) {
+      isAssign = await UserModel.findById(req.body.assignedTo);
+      if (isAssign === null) throw new BadRequestError();
+    } else isAssign = "";
+    //Create a new todo
     const newTodo = await TodoService.addTodo(req.body, user.id!);
     res.status(201).json(newTodo);
   } catch (err) {
+    console.log(err);
     next(err);
   }
 };
 
 export const check = async (
-  req: TypedRequest<any, any,CheckTodoDto>,
+  req: TypedRequest<any, any, CheckTodoDto>,
   res: Response,
   next: NextFunction
 ) => {
@@ -52,7 +58,7 @@ export const check = async (
 };
 
 export const uncheck = async (
-  req: TypedRequest<any, any,CheckTodoDto>,
+  req: TypedRequest<any, any, CheckTodoDto>,
   res: Response,
   next: NextFunction
 ) => {
