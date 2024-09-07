@@ -5,6 +5,7 @@ import { TypedRequest } from "../../utils/typed-request";
 import { UserModel } from "../user/user.model";
 import { NotFoundError } from "../../errors/not-found";
 import { BadRequestError } from "../../errors/bad-request";
+import { th } from "@faker-js/faker";
 
 export const list = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -26,13 +27,14 @@ export const add = async (
 ) => {
   try {
     const user = req.user!;
-    // Check if the assignedTo user exists
-    let isAssign;
-    if (!req.body.assignedTo !== null) {
-      isAssign = await UserModel.findById(req.body.assignedTo);
+
+    // Check if the assignedTo user exists only if it is provided
+    if (req.body.assignedTo !== undefined) {
+      const isAssign = await UserModel.findById(req.body.assignedTo);
       if (isAssign === null) throw new BadRequestError();
-    } else isAssign = "";
-    //Create a new todo
+    }
+
+    // Create a new todo
     const newTodo = await TodoService.addTodo(req.body, user.id!);
     res.status(201).json(newTodo);
   } catch (err) {
