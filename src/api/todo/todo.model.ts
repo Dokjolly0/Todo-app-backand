@@ -17,7 +17,7 @@ todoSchema.virtual("expired").get(function (this: Todo) {
   return this.dueDate && this.dueDate < data_corrente;
 });
 
-todoSchema.virtual("createdAt").get(function (this: Todo) {
+todoSchema.virtual("creationDate").get(function (this: Todo) {
   return new Date().toISOString();
 });
 
