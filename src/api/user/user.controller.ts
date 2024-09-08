@@ -21,7 +21,7 @@ export const showAllUsers = async (
     const users = await userService.showAllUsers(user.id!);
     res.json(users);
   } catch (err) {
-    next(err)
+    next(err);
   }
 };
 
@@ -48,7 +48,23 @@ export const findUserByFullName = async (
     if (!users) throw new NotFoundError();
     res.json(users);
   } catch (err) {
-    next(err)
+    next(err);
+  }
+};
+
+export const getUserById = async (
+  req: TypedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    console.log("Req.params: " + req.params);
+    const user = req.user!;
+    const userToFind: string = req.params.id;
+    const result = await userService.getUserById(user.id!, userToFind);
+    res.json(result);
+  } catch (err) {
+    next(err);
   }
 };
 

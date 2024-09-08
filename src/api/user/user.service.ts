@@ -58,7 +58,15 @@ export class UserService {
     if (!isAuthenticated) throw new UnauthorizedError();
     // Trova l'utente con lo stesso nome e cognome
     const user = await UserModel.findOne({ firstName, lastName });
-    if (!user) new NotFoundError()
+    if (!user) new NotFoundError();
+    return user;
+  }
+
+  async getUserById(userId: string, userIdToFind: string) {
+    const isAuthenticated = await UserModel.findById(userId);
+    if (!isAuthenticated) throw new UnauthorizedError();
+    const user = await UserModel.findById(userIdToFind);
+    if (!user) throw new NotFoundError();
     return user;
   }
 
