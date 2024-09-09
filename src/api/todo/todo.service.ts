@@ -103,12 +103,17 @@ export class TodoService {
 
   async updateDate(userId: string, todoData: Todo) {
     const todo = await TodoModel.findById(todoData.id);
-    if (!todo) throw new NotFoundError();
+    if (!todo) {
+      console.log("Todo non trovato");
+      throw new NotFoundError();
+    }
 
     const createdById = todo.createdBy.toString().trim();
     const assignedToId = todo.assignedTo?.toString().trim();
-    if (createdById !== userId && assignedToId !== userId)
+    if (createdById !== userId && assignedToId !== userId) {
+      console.log("Todo non trovato 2");
       throw new NotFoundError();
+    }
 
     todo.title = todoData.title;
     todo.dueDate = todoData.dueDate;
