@@ -4,6 +4,10 @@ import mongoose from "mongoose";
 const todoSchema = new mongoose.Schema<Todo>({
   //id: String,
   title: { type: String, required: true },
+  creationDate: {
+    type: Date,
+    default: Date.now,
+  },
   dueDate: { type: Date, required: false },
   completed: { type: Boolean, default: false },
   //Stringa user model
@@ -17,9 +21,9 @@ todoSchema.virtual("expired").get(function (this: Todo) {
   return this.dueDate && this.dueDate < data_corrente;
 });
 
-todoSchema.virtual("creationDate").get(function (this: Todo) {
-  return new Date().toISOString();
-});
+// todoSchema.virtual("creationDate").get(function (this: Todo) {
+//   return new Date().toISOString();
+// });
 
 todoSchema.set("toJSON", {
   virtuals: true,

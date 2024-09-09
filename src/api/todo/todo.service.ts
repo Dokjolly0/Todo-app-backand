@@ -6,6 +6,7 @@ import { AddTodoDto } from "./todo.dto";
 import { NotFoundError } from "../../errors/not-found";
 import { NotMongoIdError } from "../../errors/not-mongoId";
 import { BadRequestError } from "../../errors/bad-request";
+import { th } from "@faker-js/faker";
 
 export class TodoService {
   //Funzione per filtrare todo completi e non completi
@@ -27,23 +28,24 @@ export class TodoService {
       ...TodoObject,
       createdBy: userId, // Assegna direttamente l'ID dell'utente
     });
-    const now = new Date;
+    const now = new Date();
     return newTodo.populate("createdBy assignedTo"); // Esegui popolazione e restituisci il risultato
   }
 
   // Vale sia per Check che per Uncheck
   async checkTodo(userId, todoId: string, completed: boolean) {
-
     let todo;
-    try { 
-      todo = await TodoModel.findById(todoId); 
+    try {
+      todo = await TodoModel.findById(todoId);
       if (!todo) throw new NotFoundError();
+    } catch (err) {
+      throw new NotFoundError();
     }
-    catch (err) { throw new NotFoundError(); }
 
     const createdById = todo.createdBy.toString();
     const assignedToId = todo.assignedTo ? todo.assignedTo.toString() : null;
-    if (createdById !== userId && assignedToId !== userId) throw new NotFoundError();
+    if (createdById !== userId && assignedToId !== userId)
+      throw new NotFoundError();
     todo.completed = completed;
     await todo.save();
     return todo;
@@ -55,8 +57,9 @@ export class TodoService {
     userId: string
   ) {
     //Validation
-    if (!mongoose.Types.ObjectId.isValid(assignedTo)) throw new BadRequestError();
-    if (!mongoose.Types.ObjectId.isValid(id)) throw new NotFoundError()
+    if (!mongoose.Types.ObjectId.isValid(assignedTo))
+      throw new BadRequestError();
+    if (!mongoose.Types.ObjectId.isValid(id)) throw new NotFoundError();
     const todo = await TodoModel.findById(id); //Todo
     if (!todo) throw new NotFoundError();
     //assignedTo
@@ -98,12 +101,20 @@ export class TodoService {
     return todo;
   }
 
-  async updateDate(todoId: string, userId: string, date: Date) {
-    const todo = await TodoModel.findById(todoId);
+  async updateDate(userId: string, todoData: Todo) {
+    const todo = await TodoModel.findById(todoData.id);
     if (!todo) throw new NotFoundError();
-    todo.dueDate = date;
+
+    const createdById = todo.createdBy.toString().trim();
+    const assignedToId = todo.assignedTo?.toString().trim();
+    if (createdById !== userId && assignedToId !== userId)
+      throw new NotFoundError();
+
+    todo.title = todoData.title;
+    todo.dueDate = todoData.dueDate;
+    todo.completed = todoData.completed;
+    todo.assignedTo = todoData.assignedTo;
     await todo.save();
-    return todo;
   }
 }
 export default new TodoService();

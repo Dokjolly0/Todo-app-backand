@@ -22,11 +22,12 @@ router.post("/", validate(AddTodoDto), add);
 router.patch("/:id/check", check);
 router.patch("/:id/uncheck", uncheck);
 router.post("/:id/assign", assign);
+/* Nuove aggiunte*/
+router.patch("/update", updateDate);
+router.delete("/delete/:id", delate);
 /* Chiamate in più */
 router.get("/title/:title", getByTitle);
 router.get("/id/:id", getById);
-router.delete("/delete/:id", delate);
-router.patch("/:id/date", updateDate);
 
 export default router;
 

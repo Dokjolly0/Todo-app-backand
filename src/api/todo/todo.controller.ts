@@ -144,10 +144,9 @@ export const updateDate = async (
 ) => {
   try {
     const user = req.user!;
-    const id = req.params.id as string;
-    const date = req.body.date as Date;
-    const todo = await TodoService.updateDate(id, user.id!, date);
-    res.status(200).json(todo);
+    const todoData = req.body;
+    await TodoService.updateDate(user.id!, todoData);
+    res.status(200).json({ message: "Todo aggiornato" });
   } catch (err) {
     next(err);
   }
