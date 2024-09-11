@@ -12,6 +12,5 @@ router.get("/me", me);
 router.get("/users", showAllUsers);
 router.get("/user/:fullName", findUserByFullName);
 router.get("/:id", getUserById);
-//router.post("/user/:friendId", isAuthenticated, add_friend);
 
 export default router;

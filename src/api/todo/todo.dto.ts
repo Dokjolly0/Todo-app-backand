@@ -14,9 +14,6 @@ export class AddTodoDto {
   @IsMongoId()
   @IsOptional()
   assignedTo: mongoose.Types.ObjectId;
-
-  // @IsMongoId()
-  // createdBy: mongoose.Types.ObjectId;
 }
 
 export class CheckTodoDto {

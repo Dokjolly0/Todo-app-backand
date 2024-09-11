@@ -5,7 +5,6 @@ const userSchema = new mongoose.Schema<User>({
   firstName: String,
   lastName: String,
   picture: String,
-  //friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
 userSchema.virtual("fullName").get(function () {

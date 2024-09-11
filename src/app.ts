@@ -7,7 +7,6 @@ import { errorHandlers } from "./errors";
 import "./utils/auth/auth-handlers";
 
 const app = express();
-
 app.use(cors());
 app.use(morgan("tiny"));
 app.use(bodyParser.json());
