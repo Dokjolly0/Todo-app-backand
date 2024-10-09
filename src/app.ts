@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 app.use(morgan("tiny"));
 app.use(bodyParser.json());
-app.use("/api", apiRouter);
+app.use("/api/todoapp", apiRouter);
 app.use(errorHandlers);
 
 export default app;
