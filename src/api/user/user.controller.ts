@@ -1,4 +1,4 @@
-import { NextFunction, Response } from "express";
+import { Request, NextFunction, Response, response } from "express";
 import { TypedRequest } from "../../utils/typed-request";
 import userService from "./user.service";
 import { NotFoundError } from "../../errors/not-found";
@@ -35,12 +35,34 @@ export const findUserByFullName = async (req: TypedRequest, res: Response, next:
 
 export const getUserById = async (req: TypedRequest, res: Response, next: NextFunction) => {
   try {
-    console.log("Req.params: " + req.params);
     const user = req.user!;
     const userToFind: string = req.params.id;
     const result = await userService.getUserById(user.id!, userToFind);
     res.json(result);
   } catch (err) {
     next(err);
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = req.user!;
+    const { newPassword } = req.body;
+    const result = await userService.resetPassword(user.id!, newPassword);
+    res.json({ message: "Password updated" });
+  } catch(err) {
+    next(err);
+  }
+}
+
+export const validatePassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = req.user!;
+    const oldPassword = req.params.oldPassword;
+    const result = await userService.validatePassword(user.id!, oldPassword);
+    res.json({ message: result ? "Password is valid" : "Password is invalid" });
+  } catch (err) {
+    console.error(err); // Log the error
+    next(err); // Forward error to the error-handling middleware
   }
 };

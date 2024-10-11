@@ -54,5 +54,24 @@ export class UserService {
     if (!user) throw new NotFoundError();
     return user;
   }
+
+  async resetPassword(userId: string, newPassword: string): Promise<void> {
+    const user = await UserModel.findById(userId);
+    if (!user) throw new UnauthorizedError();
+    const identity = await UserIdentityModel.findOne({ user: userId, provider: "local" });
+    if (!identity) throw new NotFoundError();
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    identity.credentials.hashedPassword = hashedPassword;
+    await identity.save();
+  }
+
+  async validatePassword(userId: string, oldPassword: string): Promise<boolean> {
+    const user = await UserModel.findById(userId);
+    if (!user) new UnauthorizedError();
+    const identity = await UserIdentityModel.findOne({ user: userId, provider: "local" });
+    if (!identity) throw new NotFoundError();
+    const passwordMatch = await bcrypt.compare(oldPassword, identity.credentials.hashedPassword);
+    return passwordMatch;
+}
 }
 export default new UserService();
