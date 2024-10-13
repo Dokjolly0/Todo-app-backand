@@ -13,12 +13,6 @@ export class UserService {
     });
     if (existingIdentity) throw new UserExistsError();
 
-    const existingUser = await UserModel.findOne({
-      firstName: user.firstName,
-      lastName: user.lastName,
-    });
-    if (existingUser) throw new Error("Esiste già un utente con lo stesso username.");
-
     const hashedPassword = await bcrypt.hash(credentials.password, 10);
     const newUser = await UserModel.create(user);
     await UserIdentityModel.create({
@@ -72,6 +66,6 @@ export class UserService {
     if (!identity) throw new NotFoundError();
     const passwordMatch = await bcrypt.compare(oldPassword, identity.credentials.hashedPassword);
     return passwordMatch;
-}
+  }
 }
 export default new UserService();

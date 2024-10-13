@@ -47,14 +47,9 @@ export const add = async (req: TypedRequest<AddUserDTO>, res: Response, next: Ne
       res.status(400);
       res.send(e.message);
     } else {
-      if (e.message === "Esiste già un utente con lo stesso username.") {
-        res.status(400);
-        res.send(e.message);
-      } else {
-        res.status(500).json({
-          "Internal Server Error": "The server encountered an internal error" + e.message,
-        });
-      }
+      res.status(500).json({
+        "Internal Server Error": "The server encountered an internal error" + e.message,
+      });
     }
   }
 };
