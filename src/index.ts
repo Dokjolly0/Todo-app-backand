@@ -41,3 +41,9 @@ if (config.server === "localhost") {
 } else {
   console.error("Configurazione di database.json non valida, inserire 'localhost' o 'atlas'");
 }
+
+// emailService.sendEmail(
+//   "alex.violatto@itsdigitalacademy.com",
+//   "Test Email - Verifica Invio",
+//   "<p>Questa è una email di test per verificare il funzionamento del servizio email.</p>"
+// );
