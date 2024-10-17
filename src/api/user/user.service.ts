@@ -5,6 +5,7 @@ import { UserIdentityModel } from "../../utils/auth/local/user-identity.model";
 import { User } from "./user.entity";
 import { UserModel } from "./user.model";
 import * as bcrypt from "bcrypt";
+import { v4 as uuidv4 } from 'uuid';
 
 export class UserService {
   async add(user: User, credentials: { username: string; password: string }): Promise<User> {
@@ -14,7 +15,12 @@ export class UserService {
     if (existingIdentity) throw new UserExistsError();
 
     const hashedPassword = await bcrypt.hash(credentials.password, 10);
-    const newUser = await UserModel.create(user);
+    const confirmationCode = uuidv4();
+    const newUser = await UserModel.create({
+      ...user,
+      isActive: false, 
+      confirmationCode  
+  });
     await UserIdentityModel.create({
       provider: "local",
       user: newUser.id,
@@ -67,5 +73,16 @@ export class UserService {
     const passwordMatch = await bcrypt.compare(oldPassword, identity.credentials.hashedPassword);
     return passwordMatch;
   }
+
+  async verifyConfirmationCode(userId: string, confirmationCode: string) {
+    const user = await UserModel.findById(userId);
+    if (user && user.confirmationCode === confirmationCode) {
+        user.isActive = true;  
+        user.confirmationCode = undefined;  
+        await user.save();
+        return true;
+    }
+    return false;
+}
 }
 export default new UserService();

@@ -5,6 +5,9 @@ const userSchema = new mongoose.Schema<User>({
   firstName: String,
   lastName: String,
   picture: String,
+  openDate: Date,
+  isActive: Boolean,
+  confirmationCode: String
 });
 
 userSchema.virtual("fullName").get(function () {
