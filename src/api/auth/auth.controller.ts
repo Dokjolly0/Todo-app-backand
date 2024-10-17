@@ -93,15 +93,15 @@ export const confirmEmail = async (
     );
 
     if (isConfirmed) {
-      // res.redirect(
-      //   "https://alexviolatto.com/confirm-email"
-      // );
-      res.status(200).json({ message: 'Mail confermata, account attivato.' });
+      res.redirect(
+        "https://alexviolatto.com/confirm-email"
+      );
+      // res.status(200).json({ message: 'Mail confermata, account attivato.' });
     } else {
-      // res.redirect(
-      //   "https://alexviolatto.com/confirm-email-failed"
-      // );
-        res.status(400).json({ message: "Codice di conferma non valido." });
+      res.redirect(
+        "https://alexviolatto.com/confirm-email-failed"
+      );
+        // res.status(400).json({ message: "Codice di conferma non valido." });
     }
   } catch (error) {
     next(error);
