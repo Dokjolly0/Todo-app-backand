@@ -8,4 +8,6 @@ export interface UserIdentity {
     hashedPassword: string;
   };
   user: User;
+  resetPasswordToken?: string | null; // Permette string o null
+  resetPasswordExpires?: Date | null; // Permette Date o null
 }

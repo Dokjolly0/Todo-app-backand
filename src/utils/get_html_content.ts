@@ -15,3 +15,13 @@ export function getHtmlAddMessage (userId: string, confirmationCode) {
     `
     return htmlContent;
 }
+export function getHtmlRequestChangePassword (token: string, userId: string) {
+    const resetLink = `http://localhost:3000/api/todoapp/reset-password-with-email?token=${token}&userId=${userId}`;
+    const htmlContent = `
+      <p>Ciao,</p>
+      <p>Hai richiesto di reimpostare la tua password. Clicca sul link qui sotto per farlo:</p>
+      <a href="${resetLink}">Reimposta la tua password</a>
+      <p>Se non hai richiesto il reset della password, ignora questa email.</p>
+    `;
+    return htmlContent
+}

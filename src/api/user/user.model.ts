@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema<User>({
   picture: String,
   openDate: Date,
   isActive: Boolean,
-  confirmationCode: String
+  confirmationCode: String,
 });
 
 userSchema.virtual("fullName").get(function () {

@@ -2,6 +2,8 @@ import { NotFoundError } from "../../errors/not-found";
 import { UnauthorizedError } from "../../errors/UnoutorizedError";
 import { UserExistsError } from "../../errors/user-exists";
 import { UserIdentityModel } from "../../utils/auth/local/user-identity.model";
+import { emailService } from "../../utils/email.service";
+import { getHtmlRequestChangePassword } from "../../utils/get_html_content";
 import { User } from "./user.entity";
 import { UserModel } from "./user.model";
 import * as bcrypt from "bcrypt";
@@ -83,6 +85,45 @@ export class UserService {
         return true;
     }
     return false;
+  }
+
+  async requestPasswordReset(username: string): Promise<void> {
+    const user = await UserIdentityModel.findOne({
+      "credentials.username": username,
+    });
+    if (!user) throw new NotFoundError();
+
+    const token = uuidv4(); // Genera un token univoco
+    const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 ora
+
+    // Salva il token e la scadenza nel database
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = resetExpires;
+    await user.save();
+    const htmlContent = getHtmlRequestChangePassword(token, user.id);
+    await emailService.sendEmail(username, "Reimposta la tua password", htmlContent);
+  }
+
+  async validatePasswordResetToken(token: string, userId: string): Promise<boolean> {
+    const user = await UserIdentityModel.findById(userId)
+    if (!user) return false; 
+    const isTokenValid = user.resetPasswordToken === token; // Controllo del token
+    const isNotExpired = user.resetPasswordExpires !== null && user.resetPasswordExpires! > new Date();
+    // Restituisce true solo se il token è valido e non è scaduto
+    return isTokenValid && isNotExpired; 
 }
+
+  async resetPasswordFromToken(userId: string, token: string, newPassword: string): Promise<void> {
+    const user = await UserIdentityModel.findById(userId)
+    if (!user || user.resetPasswordExpires! < new Date()) throw new UnauthorizedError();
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await UserIdentityModel.updateOne(
+      { user: userId, provider: 'local' },
+      { 'credentials.hashedPassword': hashedPassword }
+    );
+    await user.save();
+  }
 }
 export default new UserService();

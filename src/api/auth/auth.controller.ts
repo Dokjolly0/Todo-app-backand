@@ -8,7 +8,7 @@ import passport, { use } from "passport";
 import * as jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../../utils/auth/jwt/jwt-strategy";
 import { emailService } from "../../utils/email.service";
-import { getHtmlAddMessage } from "../../utils/html_content_add_user";
+import { getHtmlAddMessage } from "../../utils/get_html_content";
 
 export const login = async (req: TypedRequest, res: Response, next: NextFunction) => {
   try {
@@ -54,6 +54,8 @@ export const add = async (req: TypedRequest<AddUserDTO>, res: Response, next: Ne
       ...userData,
       openDate: new Date(),
       isActive: false,
+      resetPasswordToken: null, 
+      resetPasswordExpires: null,
     };
     const credentials = pick(req.body, "username", "password");
     // Create user
