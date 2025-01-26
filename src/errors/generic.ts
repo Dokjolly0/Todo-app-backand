@@ -4,7 +4,7 @@ export const genericHandler = (err: Error, req: Request, res: Response, next: Ne
   console.error(err);
   res.status(500);
   res.json({
-    error: 'InternalServerError',
-    message: 'The server encountered an internal error'
+    error: "InternalServerError",
+    message: "The server encountered an internal error: " + err.message,
   });
-}
+};

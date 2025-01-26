@@ -3,6 +3,10 @@ import { TypedRequest } from "../../utils/typed-request";
 import userService from "./user.service";
 import { NotFoundError } from "../../errors/not-found";
 import { use } from "passport";
+import fs from "fs";
+import path from "path";
+import { UnauthorizedError } from "../../errors/UnoutorizedError";
+import { UserModel } from "./user.model";
 
 export const me = async (req: TypedRequest, res: Response, next: NextFunction) => {
   res.json(req.user!);
@@ -99,5 +103,28 @@ export const resetPasswordFromEmail = async (req: Request, res: Response, next: 
     res.status(200).json({ message: "Password reimpostata con successo." });
   } catch (error) {
     next(error);
+  }
+};
+
+export const picture = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = req.user!;
+    console.log("User:", user);
+
+    const userExist = await UserModel.findById(user.id); // Trova l'utente nel database
+    if (!userExist) throw new UnauthorizedError();
+
+    // Percorso assoluto per l'immagine dell'utente
+    const imagePath = path.posix.join(__dirname.replace(/\\/g, "/"), "../..", `${userExist.picture}`);
+
+    // Verifica se l'immagine esiste
+    if (fs.existsSync(imagePath)) {
+      // Restituisci l'immagine come file
+      res.sendFile(imagePath);
+    } else {
+      res.status(404).json({ message: "Immagine non trovata", path: imagePath });
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: "Internal Server Error: " + err.message });
   }
 };

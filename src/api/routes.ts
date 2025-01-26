@@ -11,6 +11,7 @@ const router = express.Router();
 router.use("/todos", todo_router);
 router.use("/users", userRouter);
 router.use("/", authRouter);
+
 //DEV delete all collection on db
 router.delete("/deleteall", async (req, res) => {
   try {

@@ -9,7 +9,9 @@ import "./utils/auth/auth-handlers";
 const app = express();
 app.use(cors());
 app.use(morgan("tiny"));
-app.use(bodyParser.json());
+// Aumenta il limite di dimensione per le richieste POST a 10MB
+app.use(bodyParser.json({ limit: "10mb" })); // Puoi scegliere una dimensione maggiore se necessario
+app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 app.use("/api/todoapp", apiRouter);
 app.use(errorHandlers);
 
