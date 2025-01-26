@@ -9,6 +9,9 @@ import * as jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../../utils/auth/jwt/jwt-strategy";
 import { emailService } from "../../utils/email.service";
 import { getHtmlAddMessage } from "../../utils/get_html_content";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const login = async (req: TypedRequest, res: Response, next: NextFunction) => {
   try {
@@ -28,8 +31,7 @@ export const login = async (req: TypedRequest, res: Response, next: NextFunction
       if (!user.isActive) {
         res.status(400).json({
           error: "LoginError",
-          message:
-            "Account non attivato. Controlla la tua casella mail per confermare la registrazione.",
+          message: "Account non attivato. Controlla la tua casella mail per confermare la registrazione.",
         });
         return;
       }
@@ -54,7 +56,7 @@ export const add = async (req: TypedRequest<AddUserDTO>, res: Response, next: Ne
       ...userData,
       openDate: new Date(),
       isActive: false,
-      resetPasswordToken: null, 
+      resetPasswordToken: null,
       resetPasswordExpires: null,
     };
     const credentials = pick(req.body, "username", "password");
@@ -62,7 +64,7 @@ export const add = async (req: TypedRequest<AddUserDTO>, res: Response, next: Ne
     const newUser = await userService.add(updatedUserData, credentials);
     // Send email
     const htmlContent = getHtmlAddMessage(newUser.id!, newUser.confirmationCode);
-    await emailService.sendEmail(req.body.username, "Conferma email", htmlContent)
+    await emailService.sendEmail(req.body.username, "Conferma email", htmlContent);
     // Return
     res.status(201).json({
       message:
@@ -81,29 +83,19 @@ export const add = async (req: TypedRequest<AddUserDTO>, res: Response, next: Ne
   }
 };
 
-export const confirmEmail = async (
-  req: TypedRequest,
-  res: Response,
-  next: NextFunction
-) => {
+export const confirmEmail = async (req: TypedRequest, res: Response, next: NextFunction) => {
   try {
     const { userId, code } = req.query;
 
-    const isConfirmed = await userService.verifyConfirmationCode(
-      userId as string,
-      code as string
-    );
+    const isConfirmed = await userService.verifyConfirmationCode(userId as string, code as string);
+    console.log("Success: " + isConfirmed);
 
     if (isConfirmed) {
-      res.redirect(
-        "https://alexviolatto.com/confirm-email"
-      );
-      // res.status(200).json({ message: 'Mail confermata, account attivato.' });
+      //res.redirect(process.env.API_URL + "/confirm-email-success");
+      res.status(200).json({ message: "Mail confermata, account attivato." });
     } else {
-      res.redirect(
-        "https://alexviolatto.com/confirm-email-failed"
-      );
-        // res.status(400).json({ message: "Codice di conferma non valido." });
+      //res.redirect(process.env.API_URL + "/confirm-email-failure");
+      res.status(400).json({ message: "Codice di conferma non valido." });
     }
   } catch (error) {
     next(error);

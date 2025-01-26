@@ -51,10 +51,10 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
     const { newPassword } = req.body;
     const result = await userService.resetPassword(user.id!, newPassword);
     res.json({ message: "Password updated" });
-  } catch(err) {
+  } catch (err) {
     next(err);
   }
-}
+};
 
 export const validatePassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -72,7 +72,7 @@ export const requestPasswordReset = async (req: Request, res: Response, next: Ne
   try {
     const { username } = req.body;
     await userService.requestPasswordReset(username);
-    res.status(200).json({ message: 'Controlla la tua email per le istruzioni di reset della password.' });
+    res.status(200).json({ message: "Controlla la tua email per le istruzioni di reset della password." });
   } catch (error) {
     next(error);
   }
@@ -82,11 +82,8 @@ export const validateResetToken = async (req: Request, res: Response, next: Next
   try {
     const { token, userId } = req.query;
     const isValid = await userService.validatePasswordResetToken(token as string, userId as string);
-    if (!isValid) {
-      console.log("Token: ", token, "UserId: ", userId);
-      return res.status(400).json({ message: 'Token non valido o scaduto.' });
-    }
-    res.status(200).json({ message: 'Token valido.' });
+    if (!isValid) return res.status(400).json({ message: "Token non valido o scaduto." });
+    res.status(200).json({ message: "Token valido." });
   } catch (error) {
     next(error);
   }
@@ -94,9 +91,12 @@ export const validateResetToken = async (req: Request, res: Response, next: Next
 
 export const resetPasswordFromEmail = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { userId, token, newPassword } = req.body;
-    await userService.resetPasswordFromToken(userId, token, newPassword);
-    res.status(200).json({ message: 'Password reimpostata con successo.' });
+    const { token, userId } = req.query;
+    const { newPassword } = req.body;
+    const isValid = await userService.validatePasswordResetToken(token as string, userId as string);
+    if (!isValid) return res.status(400).json({ message: "Token non valido o scaduto." });
+    await userService.resetPasswordFromToken(userId as string, token as string, newPassword);
+    res.status(200).json({ message: "Password reimpostata con successo." });
   } catch (error) {
     next(error);
   }

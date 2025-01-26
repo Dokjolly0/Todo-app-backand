@@ -7,7 +7,7 @@ import { getHtmlRequestChangePassword } from "../../utils/get_html_content";
 import { User } from "./user.entity";
 import { UserModel } from "./user.model";
 import * as bcrypt from "bcrypt";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 export class UserService {
   async add(user: User, credentials: { username: string; password: string }): Promise<User> {
@@ -20,9 +20,9 @@ export class UserService {
     const confirmationCode = uuidv4();
     const newUser = await UserModel.create({
       ...user,
-      isActive: false, 
-      confirmationCode  
-  });
+      isActive: false,
+      confirmationCode,
+    });
     await UserIdentityModel.create({
       provider: "local",
       user: newUser.id,
@@ -79,10 +79,10 @@ export class UserService {
   async verifyConfirmationCode(userId: string, confirmationCode: string) {
     const user = await UserModel.findById(userId);
     if (user && user.confirmationCode === confirmationCode) {
-        user.isActive = true;  
-        user.confirmationCode = undefined;  
-        await user.save();
-        return true;
+      user.isActive = true;
+      user.confirmationCode = undefined;
+      await user.save();
+      return true;
     }
     return false;
   }
@@ -105,23 +105,23 @@ export class UserService {
   }
 
   async validatePasswordResetToken(token: string, userId: string): Promise<boolean> {
-    const user = await UserIdentityModel.findById(userId)
-    if (!user) return false; 
+    const user = await UserIdentityModel.findById(userId);
+    if (!user) return false;
     const isTokenValid = user.resetPasswordToken === token; // Controllo del token
     const isNotExpired = user.resetPasswordExpires !== null && user.resetPasswordExpires! > new Date();
     // Restituisce true solo se il token è valido e non è scaduto
-    return isTokenValid && isNotExpired; 
-}
+    return isTokenValid && isNotExpired;
+  }
 
   async resetPasswordFromToken(userId: string, token: string, newPassword: string): Promise<void> {
-    const user = await UserIdentityModel.findById(userId)
+    const user = await UserIdentityModel.findById(userId);
     if (!user || user.resetPasswordExpires! < new Date()) throw new UnauthorizedError();
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.resetPasswordToken = null;
     user.resetPasswordExpires = null;
     await UserIdentityModel.updateOne(
-      { user: userId, provider: 'local' },
-      { 'credentials.hashedPassword': hashedPassword }
+      { user: userId, provider: "local" },
+      { "credentials.hashedPassword": hashedPassword }
     );
     await user.save();
   }
