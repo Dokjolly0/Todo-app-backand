@@ -18,11 +18,14 @@ export class UserService {
 
     const hashedPassword = await bcrypt.hash(credentials.password, 10);
     const confirmationCode = uuidv4();
+
+    // Crea l'utente con il percorso dell'immagine
     const newUser = await UserModel.create({
       ...user,
       isActive: false,
       confirmationCode,
     });
+
     await UserIdentityModel.create({
       provider: "local",
       user: newUser.id,
@@ -31,6 +34,7 @@ export class UserService {
         hashedPassword,
       },
     });
+
     return newUser;
   }
 

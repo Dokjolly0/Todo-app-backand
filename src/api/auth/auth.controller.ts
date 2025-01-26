@@ -10,6 +10,9 @@ import { JWT_SECRET } from "../../utils/auth/jwt/jwt-strategy";
 import { emailService } from "../../utils/email.service";
 import { getHtmlAddMessage } from "../../utils/get_html_content";
 import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
 
 dotenv.config();
 
@@ -60,11 +63,42 @@ export const add = async (req: TypedRequest<AddUserDTO>, res: Response, next: Ne
       resetPasswordExpires: null,
     };
     const credentials = pick(req.body, "username", "password");
+    console.log("Credentials: ", credentials);
+
+    // Gestiamo l'immagine base64, se presente
+    if (req.body.picture) {
+      //const base64Data = req.body.picture.split(";base64,").pop(); // Rimuoviamo il
+      const base64Data = req.body.picture.split(";base64,").pop();
+      //prefisso 'data:image/png;base64,'
+      console.log("Base64 data length:", base64Data?.length);
+
+      if (base64Data) {
+        const imageName = `${uuidv4()}.png`; // Generiamo un nome unico per l'immagine
+        const imagePath = path.join(__dirname, "../../image/user-img", imageName); // Percorso completo dell'immagine
+        console.log("Image path:", imagePath);
+
+        // Scriviamo il file in disco
+        fs.writeFile(imagePath, base64Data, { encoding: "base64" }, (err) => {
+          if (err) {
+            console.error("Error saving image:", err);
+            return res.status(500).json({ error: "Error saving image: " + err.message });
+          }
+          console.log("Image saved successfully");
+        });
+        console.log("Image name:", imageName);
+
+        // Aggiungiamo il percorso dell'immagine nel dato utente
+        updatedUserData.picture = `/image/user-img/${imageName}`;
+      }
+    }
+
     // Create user
     const newUser = await userService.add(updatedUserData, credentials);
+
     // Send email
     const htmlContent = getHtmlAddMessage(newUser.id!, newUser.confirmationCode);
     await emailService.sendEmail(req.body.username, "Conferma email", htmlContent);
+
     // Return
     res.status(201).json({
       message:
@@ -77,7 +111,7 @@ export const add = async (req: TypedRequest<AddUserDTO>, res: Response, next: Ne
       res.send(e.message);
     } else {
       res.status(500).json({
-        "Internal Server Error": "The server encountered an internal error" + e.message,
+        "Internal Server Error": "The server encountered an internal error: " + e.message,
       });
     }
   }
