@@ -109,8 +109,6 @@ export const resetPasswordFromEmail = async (req: Request, res: Response, next: 
 export const picture = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user!;
-    console.log("User:", user);
-
     const userExist = await UserModel.findById(user.id); // Trova l'utente nel database
     if (!userExist) throw new UnauthorizedError();
 
